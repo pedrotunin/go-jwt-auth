@@ -12,3 +12,9 @@ var ErrUserEmailAlreadyExists = errors.New("user's email already exists in our d
 // Refresh Token Errors
 var ErrRefreshTokenInvalid = errors.New("refresh token is invalid")
 var ErrRefreshTokenNotFound = errors.New("refresh token not found")
+
+// Token Errors
+var ErrTokenInvalid = errors.New("invalid token")
+
+// Password Errors
+var ErrPasswordsNotMatch = errors.New("passwords don't match")

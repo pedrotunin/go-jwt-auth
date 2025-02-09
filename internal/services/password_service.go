@@ -1,9 +1,8 @@
 package services
 
 import (
-	"errors"
-
 	"github.com/alexedwards/argon2id"
+	"github.com/pedrotunin/jwt-auth/internal/utils"
 )
 
 type PasswordService struct {
@@ -12,8 +11,6 @@ type PasswordService struct {
 func NewPasswordService() *PasswordService {
 	return &PasswordService{}
 }
-
-var ErrPasswordsNotMatch = errors.New("passwords don't match")
 
 func (ps *PasswordService) Hash(password string) (hash string, err error) {
 	hash, err = argon2id.CreateHash(password, argon2id.DefaultParams)
@@ -29,7 +26,7 @@ func (ps *PasswordService) Compare(password string, hashedPassword string) error
 		return err
 	}
 	if !match {
-		return ErrPasswordsNotMatch
+		return utils.ErrPasswordsNotMatch
 	}
 
 	return nil

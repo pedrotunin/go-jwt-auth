@@ -1,7 +1,6 @@
 package services
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
@@ -10,8 +9,6 @@ import (
 	"github.com/pedrotunin/jwt-auth/internal/repositories"
 	"github.com/pedrotunin/jwt-auth/internal/utils"
 )
-
-var ErrTokenInvalid = errors.New("invalid token")
 
 type JWTService struct {
 	hmacSecret             string
@@ -104,7 +101,7 @@ func (js *JWTService) ValidateToken(tokenString string) (*TokenClaims, error) {
 	}
 
 	if !token.Valid {
-		return nil, ErrTokenInvalid
+		return nil, utils.ErrTokenInvalid
 	}
 
 	if claims, ok := token.Claims.(TokenClaims); ok {
