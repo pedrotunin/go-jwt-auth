@@ -1,0 +1,11 @@
+# .air.toml
+[build]
+  cmd = "go build -o bin/api cmd/api/api.go"  # The build command
+  bin = "bin/api"                            # The location of the binary
+  exclude_dir = ["assets", "tmp", "bin"]     # Directories to exclude from monitoring
+  include_ext = ["go"]                       # Watch only Go files
+  watch_dir = ["cmd", "pkg"]                 # Watch specific directories for changes
+
+[log]
+  time = true
+  prefix = "[Air] "
