@@ -2,6 +2,8 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -25,7 +27,11 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 	err := c.ShouldBind(&loginDTO)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		log.Printf("Login: error during binding loginDTO: %s", err.Error())
+
+		c.JSON(http.StatusBadRequest, utils.GetErrorResponse(
+			fmt.Errorf("error parsing request body: %w", err),
+		))
 		return
 	}
 
@@ -33,34 +39,41 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 	user, err := ac.UserService.GetUserByEmail(loginDTO.Email)
 	if err != nil {
+		log.Printf("Login: error getting user: %s", err.Error())
+
 		if errors.Is(err, utils.ErrUserNotFound) {
-			c.String(http.StatusNotFound, "email or password incorrect")
+			c.JSON(http.StatusUnprocessableEntity, utils.GetErrorResponse(utils.ErrEmailPasswordIncorrect))
 			return
 		}
 
-		c.String(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(err))
 		return
 	}
 
 	err = ac.PasswordService.Compare(loginDTO.Password, user.Password)
 	if err != nil {
-		c.String(http.StatusBadRequest, "email or password incorrect")
+		log.Printf("Login: error comparing password and hash: %s", err.Error())
+
+		c.JSON(http.StatusUnprocessableEntity, utils.GetErrorResponse(utils.ErrEmailPasswordIncorrect))
 		return
 
 	}
 
 	accessToken, err := ac.JWTService.GenerateToken(user.ID)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		log.Printf("Login: error generating token: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
 		return
 	}
 
 	refreshToken, err := ac.JWTService.GenerateRefreshToken(user.ID)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		log.Printf("Login: error generating refresh token: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
 		return
 	}
 
+	log.Printf("Login: login successful")
 	c.JSON(http.StatusOK, map[string]string{
 		"messagge":      "login successful",
 		"access_token":  accessToken,
@@ -77,7 +90,10 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 
 	err := c.ShouldBind(&refreshDTO)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		log.Printf("Refresh: error during binding refreshDTO: %s", err.Error())
+		c.JSON(http.StatusBadRequest, utils.GetErrorResponse(
+			fmt.Errorf("error parsing request body: %w", err),
+		))
 		return
 	}
 
@@ -85,33 +101,39 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 
 	claims, err := ac.JWTService.ValidateRefreshToken(refreshDTO.RefreshToken)
 	if err != nil {
+		log.Printf("Refresh: error validating refresh token: %s", err.Error())
+
 		if errors.Is(err, utils.ErrRefreshTokenInvalid) {
-			c.String(http.StatusBadRequest, "invalid refresh token")
+			c.JSON(http.StatusBadRequest, utils.GetErrorResponse(utils.ErrRefreshTokenInvalid))
 			return
 		}
 
-		c.String(http.StatusInternalServerError, err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
 		return
 	}
 
 	accessToken, err := ac.JWTService.GenerateToken(claims.UserID)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		log.Printf("Refresh: error generating token: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
 		return
 	}
 
 	refreshToken, err := ac.JWTService.GenerateRefreshToken(claims.UserID)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		log.Printf("Refresh: error generating refresh token: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
 		return
 	}
 
 	err = ac.JWTService.InvalidateRefreshToken(refreshDTO.RefreshToken)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		log.Printf("Refresh: error invalidating refresh token: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
 		return
 	}
 
+	log.Printf("Refresh: successfully refreshed tokens")
 	c.JSON(http.StatusOK, map[string]string{
 		"messagge":      "tokens refreshed",
 		"access_token":  accessToken,

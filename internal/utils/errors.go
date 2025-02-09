@@ -18,3 +18,4 @@ var ErrTokenInvalid = errors.New("invalid token")
 
 // Password Errors
 var ErrPasswordsNotMatch = errors.New("passwords don't match")
+var ErrEmailPasswordIncorrect = errors.New("email or password incorrect")
