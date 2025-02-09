@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/pedrotunin/jwt-auth/internal/models"
 )
@@ -18,18 +19,17 @@ func NewPSQLUserRepository(db *sql.DB) *PSQLUserRepository {
 	}
 }
 
-func (repo *PSQLUserRepository) GetUserByID(id models.UserID) (*models.User, error) {
-	return nil, nil
-}
-
 func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.User, error) {
 	tx, err := repo.db.Begin()
 	if err != nil {
+		log.Printf("GetUserByEmail: error creating transaction: %s", err.Error())
 		return nil, fmt.Errorf("GetUserByEmail: error creating transaction: %w", err)
 	}
 
 	stmt, err := tx.Prepare("SELECT * FROM users WHERE email=$1;")
 	if err != nil {
+		log.Printf("GetUserByEmail: error creating statement: %s", err.Error())
+
 		tx.Rollback()
 		return nil, fmt.Errorf("GetUserByEmail: error creating prepared statement: %w", err)
 	}
@@ -39,6 +39,8 @@ func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.
 	var resEmail, resPassword string
 	err = stmt.QueryRow(email).Scan(&resId, &resEmail, &resPassword)
 	if err != nil {
+		log.Printf("GetUserByEmail: error executing query: %s", err.Error())
+
 		tx.Rollback()
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrUserNotFound
@@ -49,10 +51,12 @@ func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.
 
 	err = tx.Commit()
 	if err != nil {
+		log.Printf("GetUserByEmail: error during commit: %s", err.Error())
 		tx.Rollback()
 		return nil, err
 	}
 
+	log.Print("GetUserByEmail: user found in users table")
 	return &models.User{
 		ID:       resId,
 		Email:    resEmail,
@@ -61,13 +65,21 @@ func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.
 }
 
 func (repo *PSQLUserRepository) CreateUser(u *models.User) (id int, err error) {
+	user, _ := repo.GetUserByEmail(u.Email)
+	if user != nil {
+		log.Printf("GetUserByEmail: user email found in database")
+		return -1, ErrUserEmailAlreadyExists
+	}
+
 	tx, err := repo.db.Begin()
 	if err != nil {
+		log.Printf("CreateUser: error starting transaction: %s", err.Error())
 		return -1, err
 	}
 
 	stmt, err := tx.Prepare("INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id;")
 	if err != nil {
+		log.Printf("CreateUser: error starting statement: %s", err.Error())
 		tx.Rollback()
 		return -1, err
 	}
@@ -76,27 +88,18 @@ func (repo *PSQLUserRepository) CreateUser(u *models.User) (id int, err error) {
 	var insertedID int
 	err = stmt.QueryRow(u.Email, u.Password).Scan(&insertedID)
 	if err != nil {
+		log.Printf("CreateUser: error executing query: %s", err.Error())
 		tx.Rollback()
 		return -1, err
 	}
 
 	err = tx.Commit()
 	if err != nil {
+		log.Printf("CreateUser: error during commit: %s", err.Error())
 		tx.Rollback()
 		return -1, err
 	}
 
+	log.Print("CreateUser: user created in users table")
 	return insertedID, nil
-}
-
-func (repo *PSQLUserRepository) UpdateUser(u *models.User) error {
-	return nil
-}
-
-func (repo *PSQLUserRepository) DeleteUser(u *models.User) error {
-	return nil
-}
-
-func (repo *PSQLUserRepository) DeleteUserByID(id models.UserID) error {
-	return nil
 }

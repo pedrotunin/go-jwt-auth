@@ -7,12 +7,9 @@ import (
 )
 
 var ErrUserNotFound = errors.New("user not found")
+var ErrUserEmailAlreadyExists = errors.New("user's email already exists in our database")
 
 type UserRepository interface {
-	GetUserByID(id models.UserID) (*models.User, error)
 	GetUserByEmail(email models.UserEmail) (*models.User, error)
 	CreateUser(u *models.User) (id int, err error)
-	UpdateUser(u *models.User) error
-	DeleteUser(u *models.User) error
-	DeleteUserByID(id models.UserID) error
 }
