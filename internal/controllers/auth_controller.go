@@ -5,9 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrotunin/jwt-auth/internal/models"
-	"github.com/pedrotunin/jwt-auth/internal/repositories"
 	"github.com/pedrotunin/jwt-auth/internal/services"
+	"github.com/pedrotunin/jwt-auth/internal/utils"
 )
 
 type AuthController struct {
@@ -34,7 +33,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 	user, err := ac.UserService.GetUserByEmail(loginDTO.Email)
 	if err != nil {
-		if errors.Is(err, repositories.ErrUserNotFound) {
+		if errors.Is(err, utils.ErrUserNotFound) {
 			c.String(http.StatusNotFound, "email or password incorrect")
 			return
 		}
@@ -86,7 +85,7 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 
 	claims, err := ac.JWTService.ValidateRefreshToken(refreshDTO.RefreshToken)
 	if err != nil {
-		if errors.Is(err, models.ErrRefreshTokenInvalid) {
+		if errors.Is(err, utils.ErrRefreshTokenInvalid) {
 			c.String(http.StatusBadRequest, "invalid refresh token")
 			return
 		}

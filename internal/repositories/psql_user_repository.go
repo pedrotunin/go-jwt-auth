@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/pedrotunin/jwt-auth/internal/models"
+	"github.com/pedrotunin/jwt-auth/internal/utils"
 )
 
 type PSQLUserRepository struct {
@@ -43,7 +44,7 @@ func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.
 
 		tx.Rollback()
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrUserNotFound
+			return nil, utils.ErrUserNotFound
 		}
 
 		return nil, fmt.Errorf("GetUserByEmail: error scanning query result: %w", err)
@@ -68,7 +69,7 @@ func (repo *PSQLUserRepository) CreateUser(u *models.User) (id int, err error) {
 	user, _ := repo.GetUserByEmail(u.Email)
 	if user != nil {
 		log.Printf("GetUserByEmail: user email found in database")
-		return -1, ErrUserEmailAlreadyExists
+		return -1, utils.ErrUserEmailAlreadyExists
 	}
 
 	tx, err := repo.db.Begin()

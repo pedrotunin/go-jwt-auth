@@ -8,6 +8,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pedrotunin/jwt-auth/internal/models"
 	"github.com/pedrotunin/jwt-auth/internal/repositories"
+	"github.com/pedrotunin/jwt-auth/internal/utils"
 )
 
 var ErrTokenInvalid = errors.New("invalid token")
@@ -128,7 +129,7 @@ func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenCla
 	}
 
 	if !token.Valid {
-		return nil, models.ErrRefreshTokenInvalid
+		return nil, utils.ErrRefreshTokenInvalid
 	}
 
 	refreshToken, err := js.refreshTokenRepository.GetRefreshTokenByContent(tokenString)
@@ -137,7 +138,7 @@ func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenCla
 	}
 
 	if refreshToken.Status != models.RefreshTokenStatusActive {
-		return nil, models.ErrRefreshTokenInvalid
+		return nil, utils.ErrRefreshTokenInvalid
 	}
 
 	return claims, nil

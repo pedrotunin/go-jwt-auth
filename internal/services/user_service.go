@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log"
+
 	"github.com/pedrotunin/jwt-auth/internal/models"
 	"github.com/pedrotunin/jwt-auth/internal/repositories"
 )
@@ -28,12 +30,14 @@ func (us *UserService) GetUserByEmail(email string) (*models.User, error) {
 func (us *UserService) CreateUser(u *models.User) error {
 	hash, err := us.passwordService.Hash(u.Password)
 	if err != nil {
+		log.Printf("CreateUser: error hashing password: %s", err.Error())
 		return err
 	}
 	u.Password = hash
 
 	id, err := us.userRepository.CreateUser(u)
 	if err != nil {
+		log.Printf("CreateUser: error creating user: %s", err.Error())
 		return err
 	}
 

@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/pedrotunin/jwt-auth/internal/models"
+	"github.com/pedrotunin/jwt-auth/internal/utils"
 )
 
 type PSQLRefreshTokenRepository struct {
@@ -66,7 +67,7 @@ func (repo *PSQLRefreshTokenRepository) GetRefreshTokenByContent(content models.
 		tx.Rollback()
 
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrRefreshTokenNotFound
+			return nil, utils.ErrRefreshTokenNotFound
 		}
 
 		return nil, fmt.Errorf("GetUserByEmail: error scanning query result: %w", err)

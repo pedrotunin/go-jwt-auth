@@ -1,12 +1,15 @@
 package controllers
 
 import (
+	"errors"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pedrotunin/jwt-auth/internal/models"
 	"github.com/pedrotunin/jwt-auth/internal/services"
+	"github.com/pedrotunin/jwt-auth/internal/utils"
 )
 
 type UserController struct {
@@ -24,7 +27,11 @@ func (ac *UserController) CreateUser(c *gin.Context) {
 
 	err := c.ShouldBind(&u)
 	if err != nil {
-		c.String(http.StatusBadRequest, err.Error())
+		log.Printf("CreateUser: error during binding user: %s", err.Error())
+
+		c.JSON(http.StatusBadRequest, utils.GetErrorResponse(
+			fmt.Errorf("error parsing request body: %w", err),
+		))
 		return
 	}
 
@@ -32,9 +39,17 @@ func (ac *UserController) CreateUser(c *gin.Context) {
 
 	err = ac.userService.CreateUser(&u)
 	if err != nil {
-		c.String(http.StatusInternalServerError, err.Error())
+		log.Printf("CreateUser: error creating user: %s", err.Error())
+
+		if errors.Is(err, utils.ErrUserEmailAlreadyExists) {
+			c.JSON(http.StatusUnprocessableEntity, utils.GetErrorResponse(err))
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
 		return
 	}
 
-	c.String(http.StatusCreated, fmt.Sprintf("id: %d", u.ID))
+	log.Printf("CreateUser: user created with id %d", u.ID)
+	c.String(http.StatusCreated, "")
 }
