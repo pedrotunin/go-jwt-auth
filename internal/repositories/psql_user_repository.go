@@ -39,11 +39,18 @@ func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.
 	var resEmail, resPassword string
 	err = stmt.QueryRow(email).Scan(&resId, &resEmail, &resPassword)
 	if err != nil {
+		tx.Rollback()
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrUserNotFound
 		}
 
 		return nil, fmt.Errorf("GetUserByEmail: error scanning query result: %w", err)
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		return nil, err
 	}
 
 	return &models.User{

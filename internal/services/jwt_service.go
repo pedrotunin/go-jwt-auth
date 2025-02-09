@@ -1,25 +1,31 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/pedrotunin/jwt-auth/internal/models"
+	"github.com/pedrotunin/jwt-auth/internal/repositories"
 )
 
+var ErrTokenInvalid = errors.New("invalid token")
+
 type JWTService struct {
-	hmacSecret string
+	hmacSecret             string
+	refreshTokenRepository repositories.RefreshTokenRepository
 }
 
-func NewJWTService(hmacSecret string) *JWTService {
+func NewJWTService(hmacSecret string, repo repositories.RefreshTokenRepository) *JWTService {
 	return &JWTService{
-		hmacSecret: hmacSecret,
+		hmacSecret:             hmacSecret,
+		refreshTokenRepository: repo,
 	}
 }
 
 type TokenClaims struct {
-	UserID models.UserID
+	UserID models.UserID `json:"uid"`
 	jwt.RegisteredClaims
 }
 
@@ -46,7 +52,7 @@ func (js *JWTService) GenerateToken(userID models.UserID) (tokenString string, e
 }
 
 type RefreshTokenClaims struct {
-	UserID models.UserID
+	UserID models.UserID `json:"uid"`
 	jwt.RegisteredClaims
 }
 
@@ -69,11 +75,23 @@ func (js *JWTService) GenerateRefreshToken(userID models.UserID) (tokenString st
 		return "", err
 	}
 
+	refreshToken := &models.RefreshToken{
+		Content: tokenString,
+		Status:  models.RefreshTokenStatusActive,
+	}
+
+	err = js.refreshTokenRepository.CreateRefreshToken(refreshToken)
+	if err != nil {
+		return "", err
+	}
+
 	return tokenString, nil
 }
 
-func (js *JWTService) ValidateToken(tokenString string) (jwt.Claims, error) {
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+func (js *JWTService) ValidateToken(tokenString string) (*TokenClaims, error) {
+	claims := &TokenClaims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
 		}
@@ -84,9 +102,52 @@ func (js *JWTService) ValidateToken(tokenString string) (jwt.Claims, error) {
 		return nil, err
 	}
 
-	if claims, ok := token.Claims.(jwt.MapClaims); ok {
-		return claims, nil
+	if !token.Valid {
+		return nil, ErrTokenInvalid
+	}
+
+	if claims, ok := token.Claims.(TokenClaims); ok {
+		return &claims, nil
 	} else {
 		return nil, fmt.Errorf("error parsing token")
 	}
+}
+
+func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenClaims, error) {
+	claims := &RefreshTokenClaims{}
+
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
+		}
+
+		return []byte(js.hmacSecret), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if !token.Valid {
+		return nil, models.ErrRefreshTokenInvalid
+	}
+
+	refreshToken, err := js.refreshTokenRepository.GetRefreshTokenByContent(tokenString)
+	if err != nil {
+		return nil, err
+	}
+
+	if refreshToken.Status != models.RefreshTokenStatusActive {
+		return nil, models.ErrRefreshTokenInvalid
+	}
+
+	return claims, nil
+}
+
+func (js *JWTService) InvalidateRefreshToken(tokenString string) error {
+	err := js.refreshTokenRepository.InvalidateRefreshTokenByContent(tokenString)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

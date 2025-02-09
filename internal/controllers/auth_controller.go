@@ -5,20 +5,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pedrotunin/jwt-auth/internal/models"
 	"github.com/pedrotunin/jwt-auth/internal/repositories"
 	"github.com/pedrotunin/jwt-auth/internal/services"
 )
 
 type AuthController struct {
-	userService     *services.UserService
-	passwordService *services.PasswordService
-}
-
-func NewAuthController(userService *services.UserService, pwdService *services.PasswordService) *AuthController {
-	return &AuthController{
-		userService:     userService,
-		passwordService: pwdService,
-	}
+	UserService     *services.UserService
+	PasswordService *services.PasswordService
+	JWTService      *services.JWTService
 }
 
 type loginDTO struct {
@@ -37,7 +32,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 	// TODO: implement input validation
 
-	user, err := ac.userService.GetUserByEmail(loginDTO.Email)
+	user, err := ac.UserService.GetUserByEmail(loginDTO.Email)
 	if err != nil {
 		if errors.Is(err, repositories.ErrUserNotFound) {
 			c.String(http.StatusNotFound, "email or password incorrect")
@@ -48,11 +43,80 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	err = ac.passwordService.Compare(loginDTO.Password, user.Password)
+	err = ac.PasswordService.Compare(loginDTO.Password, user.Password)
 	if err != nil {
 		c.String(http.StatusBadRequest, "email or password incorrect")
 		return
 
 	}
-	c.String(http.StatusOK, "login ok")
+
+	accessToken, err := ac.JWTService.GenerateToken(user.ID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	refreshToken, err := ac.JWTService.GenerateRefreshToken(user.ID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{
+		"messagge":      "login successful",
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
+}
+
+type refreshDTO struct {
+	RefreshToken string `json:"refresh_token"`
+}
+
+func (ac *AuthController) Refresh(c *gin.Context) {
+	var refreshDTO refreshDTO
+
+	err := c.ShouldBind(&refreshDTO)
+	if err != nil {
+		c.String(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// TODO: implement input validation
+
+	claims, err := ac.JWTService.ValidateRefreshToken(refreshDTO.RefreshToken)
+	if err != nil {
+		if errors.Is(err, models.ErrRefreshTokenInvalid) {
+			c.String(http.StatusBadRequest, "invalid refresh token")
+			return
+		}
+
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	accessToken, err := ac.JWTService.GenerateToken(claims.UserID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	refreshToken, err := ac.JWTService.GenerateRefreshToken(claims.UserID)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	err = ac.JWTService.InvalidateRefreshToken(refreshDTO.RefreshToken)
+	if err != nil {
+		c.String(http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, map[string]string{
+		"messagge":      "tokens refreshed",
+		"access_token":  accessToken,
+		"refresh_token": refreshToken,
+	})
+
 }

@@ -28,14 +28,19 @@ func (app *Application) Setup() {
 
 	// Setup repositories
 	userRepository := repositories.NewPSQLUserRepository(app.DB)
+	refreshTokenRepository := repositories.NewPSQLRefreshTokenRepository(app.DB)
 
 	// Setup services
-	jwtService := services.NewJWTService(hmacSecret)
+	jwtService := services.NewJWTService(hmacSecret, refreshTokenRepository)
 	passwordService := services.NewPasswordService()
 	userService := services.NewUserService(userRepository, passwordService)
 
 	// Setup controllers
-	authController := controllers.NewAuthController(userService, passwordService)
+	authController := &controllers.AuthController{
+		UserService:     userService,
+		PasswordService: passwordService,
+		JWTService:      jwtService,
+	}
 	userController := controllers.NewUserController(userService)
 
 	// Setup middlewares

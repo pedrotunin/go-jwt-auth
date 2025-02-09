@@ -15,4 +15,5 @@ type Routes struct {
 func (r *Routes) Setup() {
 	r.Router.POST("/users", r.Controllers.UserController.CreateUser)
 	r.Router.POST("/login", r.Controllers.AuthController.Login)
+	r.Router.POST("/refresh", r.Controllers.AuthController.Refresh)
 }

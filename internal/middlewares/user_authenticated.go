@@ -39,9 +39,7 @@ func (aum *AuthenticatedUserMiddleware) IsAuthenticated(c *gin.Context) {
 
 	tokenString := strings.Split(authorization[0], " ")[1]
 
-	jwts := services.NewJWTService("abc123")
-
-	claims, err := jwts.ValidateToken(tokenString)
+	claims, err := aum.jwtService.ValidateToken(tokenString)
 	if err != nil {
 		c.String(http.StatusUnauthorized, fmt.Errorf("error validating bearer token: %w", err).Error())
 		return
