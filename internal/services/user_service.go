@@ -21,9 +21,11 @@ func NewUserService(repository repositories.UserRepository, pwdService *Password
 func (us *UserService) GetUserByEmail(email string) (*models.User, error) {
 	user, err := us.userRepository.GetUserByEmail(email)
 	if err != nil {
+		log.Printf("GetUserByEmail: error getting user in database: %s", err.Error())
 		return nil, err
 	}
 
+	log.Printf("GetUserByEmail: user found in database")
 	return user, nil
 }
 
@@ -43,5 +45,6 @@ func (us *UserService) CreateUser(u *models.User) error {
 
 	u.ID = id
 
+	log.Printf("CreateUser: user created")
 	return nil
 }
