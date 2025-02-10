@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/pedrotunin/go-jwt-auth/internal/models"
 	"github.com/pedrotunin/go-jwt-auth/internal/services"
 	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
@@ -35,7 +36,11 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	// TODO: implement input validation
+	_, err = models.NewUser(loginDTO.Email, loginDTO.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.GetErrorResponse(err))
+		return
+	}
 
 	user, err := ac.UserService.GetUserByEmail(loginDTO.Email)
 	if err != nil {
