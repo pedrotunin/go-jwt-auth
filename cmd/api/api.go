@@ -46,6 +46,12 @@ func main() {
 
 	log.Print("connected to database")
 
+	mode := os.Getenv("MODE")
+
+	if mode == "PRODUCTION" {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	router := gin.Default()
 	router.Use(gin.Recovery())
 
