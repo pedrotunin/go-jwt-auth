@@ -13,7 +13,16 @@ type Routes struct {
 }
 
 func (r *Routes) Setup() {
-	r.Router.POST("/users", r.Controllers.UserController.CreateUser)
-	r.Router.POST("/login", r.Controllers.AuthController.Login)
-	r.Router.POST("/refresh", r.Controllers.AuthController.Refresh)
+	r.Router.Use(r.Middlewares.LoggerMiddleware.LogRequest())
+
+	usersRoutes := r.Router.Group("/users")
+	{
+		usersRoutes.POST("", r.Controllers.UserController.CreateUser)
+	}
+
+	authRoutes := r.Router.Group("/auth")
+	{
+		authRoutes.POST("/login", r.Controllers.AuthController.Login)
+		authRoutes.POST("/refresh", r.Controllers.AuthController.Refresh)
+	}
 }

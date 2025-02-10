@@ -47,6 +47,7 @@ func main() {
 	log.Print("connected to database")
 
 	router := gin.Default()
+	router.Use(gin.Recovery())
 
 	app := &config.Application{
 		Router: router,

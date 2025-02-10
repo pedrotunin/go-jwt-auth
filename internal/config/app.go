@@ -45,12 +45,14 @@ func (app *Application) Setup() {
 
 	// Setup middlewares
 	authenticatedUserMiddleware := middlewares.NewAuthenticatedUserMiddleware(jwtService)
+	loggerMiddleware := middlewares.NewLoggerMiddleware()
 
 	// Setup Routes
 	routes := &routes.Routes{
 		Router: app.Router,
 		Middlewares: &middlewares.Middlewares{
 			AuthenticatedUserMiddleware: authenticatedUserMiddleware,
+			LoggerMiddleware:            loggerMiddleware,
 		},
 		Controllers: &controllers.Controllers{
 			AuthController: authController,

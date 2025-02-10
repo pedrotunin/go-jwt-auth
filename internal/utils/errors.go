@@ -4,6 +4,9 @@ import "errors"
 
 // General Errors
 var ErrInternalServerError = errors.New("internal server error. contact system admin")
+var ErrAuthorizationHeaderNotFound = errors.New("Authorization header not found")
+var ErrMultipleAuthorizationHeaders = errors.New("multiple Authorization headers not accepted")
+var ErrAuthorizationHeaderMalformed = errors.New("Authorization header malformed")
 
 // User Errors
 var ErrUserNotFound = errors.New("user not found")
