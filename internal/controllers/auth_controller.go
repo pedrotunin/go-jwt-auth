@@ -102,8 +102,6 @@ func (ac *AuthController) Refresh(c *gin.Context) {
 		return
 	}
 
-	// TODO: implement input validation
-
 	claims, err := ac.JWTService.ValidateRefreshToken(refreshDTO.RefreshToken)
 	if err != nil {
 		log.Printf("Refresh: error validating refresh token: %s", err.Error())
