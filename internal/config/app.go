@@ -6,11 +6,11 @@ import (
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrotunin/jwt-auth/internal/controllers"
-	"github.com/pedrotunin/jwt-auth/internal/middlewares"
-	"github.com/pedrotunin/jwt-auth/internal/repositories"
-	"github.com/pedrotunin/jwt-auth/internal/routes"
-	"github.com/pedrotunin/jwt-auth/internal/services"
+	"github.com/pedrotunin/go-jwt-auth/internal/controllers"
+	"github.com/pedrotunin/go-jwt-auth/internal/middlewares"
+	"github.com/pedrotunin/go-jwt-auth/internal/repositories"
+	"github.com/pedrotunin/go-jwt-auth/internal/routes"
+	"github.com/pedrotunin/go-jwt-auth/internal/services"
 )
 
 type Application struct {

@@ -4,7 +4,7 @@ import (
 	"log"
 
 	"github.com/alexedwards/argon2id"
-	"github.com/pedrotunin/jwt-auth/internal/utils"
+	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
 type PasswordService struct {

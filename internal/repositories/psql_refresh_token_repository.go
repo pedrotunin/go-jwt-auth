@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/pedrotunin/jwt-auth/internal/models"
-	"github.com/pedrotunin/jwt-auth/internal/utils"
+	"github.com/pedrotunin/go-jwt-auth/internal/models"
+	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
 type PSQLRefreshTokenRepository struct {

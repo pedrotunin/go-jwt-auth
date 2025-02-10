@@ -7,8 +7,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/pedrotunin/jwt-auth/internal/services"
-	"github.com/pedrotunin/jwt-auth/internal/utils"
+	"github.com/pedrotunin/go-jwt-auth/internal/services"
+	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
 type AuthController struct {

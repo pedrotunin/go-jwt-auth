@@ -1,6 +1,6 @@
 package validators
 
-import "github.com/pedrotunin/jwt-auth/internal/utils"
+import "github.com/pedrotunin/go-jwt-auth/internal/utils"
 
 func IsValidPassword(password string) error {
 	if len(password) < 8 {

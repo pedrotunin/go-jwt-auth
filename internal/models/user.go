@@ -3,7 +3,7 @@ package models
 import (
 	"strings"
 
-	"github.com/pedrotunin/jwt-auth/internal/validators"
+	"github.com/pedrotunin/go-jwt-auth/internal/validators"
 )
 
 type UserID = int

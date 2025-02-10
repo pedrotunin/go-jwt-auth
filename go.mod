@@ -1,4 +1,4 @@
-module github.com/pedrotunin/jwt-auth
+module github.com/pedrotunin/go-jwt-auth
 
 go 1.23.5
 

@@ -3,7 +3,7 @@ package validators
 import (
 	"regexp"
 
-	"github.com/pedrotunin/jwt-auth/internal/utils"
+	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
 func IsValidEmail(email string) error {

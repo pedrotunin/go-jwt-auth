@@ -2,8 +2,8 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/pedrotunin/jwt-auth/internal/controllers"
-	"github.com/pedrotunin/jwt-auth/internal/middlewares"
+	"github.com/pedrotunin/go-jwt-auth/internal/controllers"
+	"github.com/pedrotunin/go-jwt-auth/internal/middlewares"
 )
 
 type Routes struct {

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/pedrotunin/jwt-auth/internal/models"
-	"github.com/pedrotunin/jwt-auth/internal/repositories"
-	"github.com/pedrotunin/jwt-auth/internal/utils"
+	"github.com/pedrotunin/go-jwt-auth/internal/models"
+	"github.com/pedrotunin/go-jwt-auth/internal/repositories"
+	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
 type JWTService struct {

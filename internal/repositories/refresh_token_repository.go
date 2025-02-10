@@ -1,7 +1,7 @@
 package repositories
 
 import (
-	"github.com/pedrotunin/jwt-auth/internal/models"
+	"github.com/pedrotunin/go-jwt-auth/internal/models"
 )
 
 type RefreshTokenRepository interface {

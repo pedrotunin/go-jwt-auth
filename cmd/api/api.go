@@ -8,7 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/pedrotunin/jwt-auth/internal/config"
+	"github.com/pedrotunin/go-jwt-auth/internal/config"
 
 	_ "github.com/lib/pq"
 )

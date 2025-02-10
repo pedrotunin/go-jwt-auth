@@ -3,8 +3,8 @@ package services
 import (
 	"log"
 
-	"github.com/pedrotunin/jwt-auth/internal/models"
-	"github.com/pedrotunin/jwt-auth/internal/repositories"
+	"github.com/pedrotunin/go-jwt-auth/internal/models"
+	"github.com/pedrotunin/go-jwt-auth/internal/repositories"
 )
 
 type UserService struct {
