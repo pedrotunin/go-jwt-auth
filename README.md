@@ -60,6 +60,7 @@ Before running the project, you need to have the following installed:
     DB_NAME=your_database
     HMAC_SECRET=
     PORT=8080
+    MODE=DEBUG # DEBUG or PRODUCTION
     ```
 
 4. **(Optional)** Install Air for live-reloading during development:
