@@ -22,10 +22,15 @@ func NewUserController(userService *services.UserService) *UserController {
 	}
 }
 
-func (ac *UserController) CreateUser(c *gin.Context) {
-	var u models.User
+type createUserDTO struct {
+	Email    string
+	Password string
+}
 
-	err := c.ShouldBind(&u)
+func (ac *UserController) CreateUser(c *gin.Context) {
+	var createUserDTO createUserDTO
+
+	err := c.ShouldBind(&createUserDTO)
 	if err != nil {
 		log.Printf("CreateUser: error during binding user: %s", err.Error())
 
@@ -35,9 +40,13 @@ func (ac *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: implement request validation
+	user, err := models.NewUser(createUserDTO.Email, createUserDTO.Password)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, utils.GetErrorResponse(err))
+		return
+	}
 
-	err = ac.userService.CreateUser(&u)
+	err = ac.userService.CreateUser(user)
 	if err != nil {
 		log.Printf("CreateUser: error creating user: %s", err.Error())
 
@@ -50,6 +59,6 @@ func (ac *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	log.Printf("CreateUser: user created with id %d", u.ID)
+	log.Printf("CreateUser: user created with id %d", user.ID)
 	c.String(http.StatusCreated, "")
 }
