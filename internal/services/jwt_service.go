@@ -81,15 +81,16 @@ func (js *JWTService) GenerateRefreshToken(userID models.UserID) (tokenString st
 		return "", err
 	}
 
-	tokenHash, err := js.hashService.Hash(tokenString)
+	hashToken, err := js.hashService.HashSHA256(tokenString)
 	if err != nil {
 		log.Printf("GenerateRefreshToken: error hashing refresh token: %s", err.Error())
 		return "", err
 	}
 
 	refreshToken := &models.RefreshToken{
-		Content: tokenHash,
+		Content: hashToken,
 		Status:  models.RefreshTokenStatusActive,
+		UserID:  userID,
 	}
 
 	err = js.refreshTokenRepository.CreateRefreshToken(refreshToken)
@@ -138,7 +139,7 @@ func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenCla
 	})
 	if err != nil {
 		log.Printf("ValidateRefreshToken: error parsing token: %s", err.Error())
-		return nil, err
+		return nil, utils.ErrRefreshTokenInvalid
 	}
 
 	if !token.Valid {
@@ -146,13 +147,13 @@ func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenCla
 		return nil, utils.ErrRefreshTokenInvalid
 	}
 
-	tokenHash, err := js.hashService.Hash(tokenString)
+	hashToken, err := js.hashService.HashSHA256(tokenString)
 	if err != nil {
 		log.Printf("ValidateRefreshToken: error hashing token: %s", err.Error())
 		return nil, err
 	}
 
-	refreshToken, err := js.refreshTokenRepository.GetRefreshTokenByContent(tokenHash)
+	refreshToken, err := js.refreshTokenRepository.GetRefreshTokenByContent(hashToken)
 	if err != nil {
 		log.Printf("ValidateRefreshToken: error getting refresh token in database: %s", err.Error())
 		return nil, err
@@ -168,7 +169,12 @@ func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenCla
 }
 
 func (js *JWTService) InvalidateRefreshToken(tokenString string) error {
-	err := js.refreshTokenRepository.InvalidateRefreshTokenByContent(tokenString)
+	tokenHash, err := js.hashService.HashSHA256(tokenString)
+	if err != nil {
+		return err
+	}
+
+	err = js.refreshTokenRepository.InvalidateRefreshTokenByContent(tokenHash)
 	if err != nil {
 		log.Printf("InvalidateRefreshToken: error invalidating refresh token in database: %s", err.Error())
 		return err

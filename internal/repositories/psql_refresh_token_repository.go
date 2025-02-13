@@ -27,7 +27,7 @@ func (repo *PSQLRefreshTokenRepository) CreateRefreshToken(token *models.Refresh
 		return err
 	}
 
-	stmt, err := tx.Prepare("INSERT INTO refresh_tokens (content, status) VALUES ($1, $2);")
+	stmt, err := tx.Prepare("INSERT INTO refresh_tokens (content, status, user_id) VALUES ($1, $2, $3);")
 	if err != nil {
 		log.Printf("CreateRefreshToken: error creating statement: %s", err.Error())
 		tx.Rollback()
@@ -35,7 +35,7 @@ func (repo *PSQLRefreshTokenRepository) CreateRefreshToken(token *models.Refresh
 	}
 	defer stmt.Close()
 
-	_, err = stmt.Exec(token.Content, token.Status)
+	_, err = stmt.Exec(token.Content, token.Status, token.UserID)
 	if err != nil {
 		log.Printf("CreateRefreshToken: error executing query: %s", err.Error())
 		tx.Rollback()
@@ -60,7 +60,7 @@ func (repo *PSQLRefreshTokenRepository) GetRefreshTokenByContent(content models.
 		return nil, fmt.Errorf("GetRefreshTokenByContent: error creating transaction: %w", err)
 	}
 
-	stmt, err := tx.Prepare("SELECT * FROM refresh_tokens WHERE content=$1;")
+	stmt, err := tx.Prepare("SELECT id, content, user_id, status FROM refresh_tokens WHERE content=$1;")
 	if err != nil {
 		log.Printf("GetRefreshTokenByContent: error creating statement: %s", err.Error())
 		tx.Rollback()
@@ -68,10 +68,11 @@ func (repo *PSQLRefreshTokenRepository) GetRefreshTokenByContent(content models.
 	}
 	defer stmt.Close()
 
-	var resId int
+	var resId, resUserId int
 	var resContent, resStatus string
-	err = stmt.QueryRow(content).Scan(&resId, &resContent, &resStatus)
+	err = stmt.QueryRow(content).Scan(&resId, &resContent, &resUserId, &resStatus)
 	if err != nil {
+		log.Printf("content: %s", content)
 		log.Printf("GetRefreshTokenByContent: error executing query: %s", err.Error())
 		tx.Rollback()
 
@@ -94,6 +95,7 @@ func (repo *PSQLRefreshTokenRepository) GetRefreshTokenByContent(content models.
 		ID:      resId,
 		Content: resContent,
 		Status:  resStatus,
+		UserID:  resUserId,
 	}, nil
 }
 

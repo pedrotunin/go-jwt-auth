@@ -9,11 +9,13 @@ import (
 type UserID = int
 type UserEmail = string
 type UserPassword = string
+type UserStatus = string
 
 type User struct {
 	ID       UserID
 	Email    UserEmail
 	Password UserPassword
+	Status   UserStatus
 }
 
 func NewUser(email, password string) (*User, error) {

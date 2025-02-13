@@ -27,7 +27,7 @@ func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.
 		return nil, fmt.Errorf("GetUserByEmail: error creating transaction: %w", err)
 	}
 
-	stmt, err := tx.Prepare("SELECT * FROM users WHERE email=$1;")
+	stmt, err := tx.Prepare("SELECT id, email, password, status FROM users WHERE email=$1;")
 	if err != nil {
 		log.Printf("GetUserByEmail: error creating statement: %s", err.Error())
 
@@ -37,8 +37,8 @@ func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.
 	defer stmt.Close()
 
 	var resId int
-	var resEmail, resPassword string
-	err = stmt.QueryRow(email).Scan(&resId, &resEmail, &resPassword)
+	var resEmail, resPassword, resStatus string
+	err = stmt.QueryRow(email).Scan(&resId, &resEmail, &resPassword, &resStatus)
 	if err != nil {
 		log.Printf("GetUserByEmail: error executing query: %s", err.Error())
 
@@ -62,6 +62,7 @@ func (repo *PSQLUserRepository) GetUserByEmail(email models.UserEmail) (*models.
 		ID:       resId,
 		Email:    resEmail,
 		Password: resPassword,
+		Status:   resStatus,
 	}, nil
 }
 

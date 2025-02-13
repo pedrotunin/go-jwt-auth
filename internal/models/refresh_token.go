@@ -11,4 +11,5 @@ type RefreshToken struct {
 	ID      RefreshTokenID
 	Content RefreshTokenContent
 	Status  RefreshTokenStatus
+	UserID  UserID
 }

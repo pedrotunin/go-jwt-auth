@@ -55,7 +55,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	err = ac.HashService.Compare(loginDTO.Password, user.Password)
+	err = ac.HashService.CompareArgon2id(loginDTO.Password, user.Password)
 	if err != nil {
 		log.Printf("Login: error comparing password and hash: %s", err.Error())
 

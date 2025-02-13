@@ -30,7 +30,7 @@ func (us *UserService) GetUserByEmail(email string) (*models.User, error) {
 }
 
 func (us *UserService) CreateUser(u *models.User) error {
-	hash, err := us.hashService.Hash(u.Password)
+	hash, err := us.hashService.HashArgon2id(u.Password)
 	if err != nil {
 		log.Printf("CreateUser: error hashing password: %s", err.Error())
 		return err
