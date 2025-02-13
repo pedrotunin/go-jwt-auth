@@ -13,9 +13,9 @@ import (
 )
 
 type AuthController struct {
-	UserService     *services.UserService
-	PasswordService *services.PasswordService
-	JWTService      *services.JWTService
+	UserService *services.UserService
+	HashService *services.HashService
+	JWTService  *services.JWTService
 }
 
 type loginDTO struct {
@@ -55,7 +55,7 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
-	err = ac.PasswordService.Compare(loginDTO.Password, user.Password)
+	err = ac.HashService.Compare(loginDTO.Password, user.Password)
 	if err != nil {
 		log.Printf("Login: error comparing password and hash: %s", err.Error())
 

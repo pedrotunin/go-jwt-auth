@@ -8,11 +8,11 @@ import (
 )
 
 type UserService struct {
-	userRepository  repositories.UserRepository
-	passwordService *PasswordService
+	userRepository repositories.UserRepository
+	hashService    *HashService
 }
 
-func NewUserService(repository repositories.UserRepository, pwdService *PasswordService) *UserService {
+func NewUserService(repository repositories.UserRepository, pwdService *HashService) *UserService {
 	return &UserService{
 		userRepository: repository,
 	}
@@ -30,7 +30,7 @@ func (us *UserService) GetUserByEmail(email string) (*models.User, error) {
 }
 
 func (us *UserService) CreateUser(u *models.User) error {
-	hash, err := us.passwordService.Hash(u.Password)
+	hash, err := us.hashService.Hash(u.Password)
 	if err != nil {
 		log.Printf("CreateUser: error hashing password: %s", err.Error())
 		return err

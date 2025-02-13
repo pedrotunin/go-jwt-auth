@@ -7,34 +7,34 @@ import (
 	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
-type PasswordService struct {
+type HashService struct {
 }
 
-func NewPasswordService() *PasswordService {
-	return &PasswordService{}
+func NewHashService() *HashService {
+	return &HashService{}
 }
 
-func (ps *PasswordService) Hash(password string) (hash string, err error) {
-	hash, err = argon2id.CreateHash(password, argon2id.DefaultParams)
+func (ps *HashService) Hash(text string) (hash string, err error) {
+	hash, err = argon2id.CreateHash(text, argon2id.DefaultParams)
 	if err != nil {
-		log.Printf("Hash: error creating password hash: %s", err.Error())
+		log.Printf("Hash: error creating hash: %s", err.Error())
 		return "", err
 	}
 	log.Printf("Hash: hash created")
 	return hash, err
 }
 
-func (ps *PasswordService) Compare(password string, hashedPassword string) error {
-	match, err := argon2id.ComparePasswordAndHash(password, hashedPassword)
+func (ps *HashService) Compare(text string, hashedText string) error {
+	match, err := argon2id.ComparePasswordAndHash(text, hashedText)
 	if err != nil {
-		log.Printf("Compare: error comparing password and hash: %s", err.Error())
+		log.Printf("Compare: error comparing text and hash: %s", err.Error())
 		return err
 	}
 	if !match {
-		log.Printf("Compare: password do not match with hash")
+		log.Printf("Compare: text do not match with hash")
 		return utils.ErrPasswordsNotMatch
 	}
 
-	log.Printf("Compare: password and hash match")
+	log.Printf("Compare: text and hash match")
 	return nil
 }

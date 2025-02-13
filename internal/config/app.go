@@ -36,15 +36,15 @@ func (app *Application) Setup() {
 	refreshTokenRepository := repositories.NewPSQLRefreshTokenRepository(app.DB)
 
 	// Setup services
-	jwtService := services.NewJWTService(tokenSecret, refreshTokenSecret, refreshTokenRepository)
-	passwordService := services.NewPasswordService()
-	userService := services.NewUserService(userRepository, passwordService)
+	hashService := services.NewHashService()
+	jwtService := services.NewJWTService(tokenSecret, refreshTokenSecret, refreshTokenRepository, hashService)
+	userService := services.NewUserService(userRepository, hashService)
 
 	// Setup controllers
 	authController := &controllers.AuthController{
-		UserService:     userService,
-		PasswordService: passwordService,
-		JWTService:      jwtService,
+		UserService: userService,
+		HashService: hashService,
+		JWTService:  jwtService,
 	}
 	userController := controllers.NewUserController(userService)
 

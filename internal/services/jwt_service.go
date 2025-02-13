@@ -15,13 +15,15 @@ type JWTService struct {
 	tokenSecret            string
 	refreshTokenSecret     string
 	refreshTokenRepository repositories.RefreshTokenRepository
+	hashService            *HashService
 }
 
-func NewJWTService(tokenSecret, refreshTokenSecret string, repo repositories.RefreshTokenRepository) *JWTService {
+func NewJWTService(tokenSecret, refreshTokenSecret string, repo repositories.RefreshTokenRepository, hashService *HashService) *JWTService {
 	return &JWTService{
 		tokenSecret:            tokenSecret,
 		refreshTokenSecret:     refreshTokenSecret,
 		refreshTokenRepository: repo,
+		hashService:            hashService,
 	}
 }
 
@@ -79,8 +81,14 @@ func (js *JWTService) GenerateRefreshToken(userID models.UserID) (tokenString st
 		return "", err
 	}
 
+	tokenHash, err := js.hashService.Hash(tokenString)
+	if err != nil {
+		log.Printf("GenerateRefreshToken: error hashing refresh token: %s", err.Error())
+		return "", err
+	}
+
 	refreshToken := &models.RefreshToken{
-		Content: tokenString,
+		Content: tokenHash,
 		Status:  models.RefreshTokenStatusActive,
 	}
 
@@ -138,7 +146,13 @@ func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenCla
 		return nil, utils.ErrRefreshTokenInvalid
 	}
 
-	refreshToken, err := js.refreshTokenRepository.GetRefreshTokenByContent(tokenString)
+	tokenHash, err := js.hashService.Hash(tokenString)
+	if err != nil {
+		log.Printf("ValidateRefreshToken: error hashing token: %s", err.Error())
+		return nil, err
+	}
+
+	refreshToken, err := js.refreshTokenRepository.GetRefreshTokenByContent(tokenHash)
 	if err != nil {
 		log.Printf("ValidateRefreshToken: error getting refresh token in database: %s", err.Error())
 		return nil, err
