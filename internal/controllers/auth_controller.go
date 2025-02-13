@@ -93,6 +93,7 @@ func (ac *AuthController) Logout(c *gin.Context) {
 
 	claims, err := ac.JWTService.ValidateToken(token)
 	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrTokenInvalid))
 		return
 	}
 
