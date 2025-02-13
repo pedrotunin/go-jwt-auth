@@ -33,7 +33,7 @@ type TokenClaims struct {
 }
 
 func (js *JWTService) GenerateToken(userID models.UserID) (tokenString string, err error) {
-	expiration := time.Now().Add(10 * time.Minute)
+	expiration := time.Now().Add(5 * time.Minute)
 
 	claims := &TokenClaims{
 		UserID: userID,
@@ -181,5 +181,15 @@ func (js *JWTService) InvalidateRefreshToken(tokenString string) error {
 	}
 
 	log.Printf("InvalidateRefreshToken: refresh token invalidated")
+	return nil
+}
+
+func (js *JWTService) InvalidateRefreshTokensByUserID(userID models.UserID) error {
+	err := js.refreshTokenRepository.InvalidateRefreshTokensByUserID(userID)
+	if err != nil {
+		log.Printf("InvalidateRefreshTokens: error invalidating tokens: %s", err.Error())
+		return err
+	}
+
 	return nil
 }
