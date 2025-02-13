@@ -11,14 +11,23 @@ import (
 	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
+type IJWTService interface {
+	GenerateToken(userID models.UserID) (tokenString string, err error)
+	GenerateRefreshToken(userID models.UserID) (tokenString string, err error)
+	ValidateToken(tokenString string) (*TokenClaims, error)
+	ValidateRefreshToken(tokenString string) (*RefreshTokenClaims, error)
+	InvalidateRefreshToken(tokenString string) error
+	InvalidateRefreshTokensByUserID(userID models.UserID) error
+}
+
 type JWTService struct {
 	tokenSecret            string
 	refreshTokenSecret     string
 	refreshTokenRepository repositories.RefreshTokenRepository
-	hashService            *HashService
+	hashService            IHashService
 }
 
-func NewJWTService(tokenSecret, refreshTokenSecret string, repo repositories.RefreshTokenRepository, hashService *HashService) *JWTService {
+func NewJWTService(tokenSecret, refreshTokenSecret string, repo repositories.RefreshTokenRepository, hashService IHashService) IJWTService {
 	return &JWTService{
 		tokenSecret:            tokenSecret,
 		refreshTokenSecret:     refreshTokenSecret,

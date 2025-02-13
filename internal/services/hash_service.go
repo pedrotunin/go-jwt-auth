@@ -9,10 +9,16 @@ import (
 	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
+type IHashService interface {
+	HashArgon2id(text string) (hash string, err error)
+	CompareArgon2id(text string, hashedText string) error
+	HashSHA256(text string) (hash string, err error)
+}
+
 type HashService struct {
 }
 
-func NewHashService() *HashService {
+func NewHashService() IHashService {
 	return &HashService{}
 }
 

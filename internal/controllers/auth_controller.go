@@ -14,9 +14,9 @@ import (
 )
 
 type AuthController struct {
-	UserService *services.UserService
-	HashService *services.HashService
-	JWTService  *services.JWTService
+	UserService services.IUserService
+	HashService services.IHashService
+	JWTService  services.IJWTService
 }
 
 type loginDTO struct {

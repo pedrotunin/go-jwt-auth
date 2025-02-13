@@ -7,14 +7,20 @@ import (
 	"github.com/pedrotunin/go-jwt-auth/internal/repositories"
 )
 
-type UserService struct {
-	userRepository repositories.UserRepository
-	hashService    *HashService
+type IUserService interface {
+	GetUserByEmail(email string) (*models.User, error)
+	CreateUser(u *models.User) error
 }
 
-func NewUserService(repository repositories.UserRepository, pwdService *HashService) *UserService {
+type UserService struct {
+	userRepository repositories.UserRepository
+	hashService    IHashService
+}
+
+func NewUserService(repository repositories.UserRepository, hashService IHashService) IUserService {
 	return &UserService{
 		userRepository: repository,
+		hashService:    hashService,
 	}
 }
 
