@@ -1,6 +1,6 @@
 package middlewares
 
 type Middlewares struct {
-	AuthenticatedUserMiddleware *AuthenticatedUserMiddleware
-	LoggerMiddleware            *LoggerMiddleware
+	AuthenticatedUserMiddleware IAuthenticatedUserMiddleware
+	LoggerMiddleware            ILoggerMiddleware
 }

@@ -10,11 +10,15 @@ import (
 	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
+type IAuthenticatedUserMiddleware interface {
+	IsAuthenticated() gin.HandlerFunc
+}
+
 type AuthenticatedUserMiddleware struct {
 	jwtService services.IJWTService
 }
 
-func NewAuthenticatedUserMiddleware(jwtService services.IJWTService) *AuthenticatedUserMiddleware {
+func NewAuthenticatedUserMiddleware(jwtService services.IJWTService) IAuthenticatedUserMiddleware {
 	return &AuthenticatedUserMiddleware{
 		jwtService: jwtService,
 	}

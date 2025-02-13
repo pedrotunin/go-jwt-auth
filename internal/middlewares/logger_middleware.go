@@ -7,10 +7,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+type ILoggerMiddleware interface {
+	LogRequest() gin.HandlerFunc
+}
+
 type LoggerMiddleware struct {
 }
 
-func NewLoggerMiddleware() *LoggerMiddleware {
+func NewLoggerMiddleware() ILoggerMiddleware {
 	return &LoggerMiddleware{}
 }
 
