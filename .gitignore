@@ -1,3 +1,5 @@
 .env
 tmp/
 bin/
+.scannerwork/
+sonar-project.properties
