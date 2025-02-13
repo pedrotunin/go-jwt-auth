@@ -58,7 +58,8 @@ Before running the project, you need to have the following installed:
     DB_HOST=localhost
     DB_PORT=5432
     DB_NAME=your_database
-    HMAC_SECRET=
+    JWT_TOKEN_SECRET=
+    JWT_REFRESH_TOKEN_SECRET=
     PORT=8080
     MODE=DEBUG # DEBUG or PRODUCTION
     ```

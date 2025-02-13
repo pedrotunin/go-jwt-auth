@@ -21,9 +21,14 @@ type Application struct {
 func (app *Application) Setup() {
 	log.Print("starting app setup")
 
-	hmacSecret := os.Getenv("HMAC_SECRET")
-	if hmacSecret == "" {
-		log.Fatal("HMAC_SECRET env var not found")
+	tokenSecret := os.Getenv("JWT_TOKEN_SECRET")
+	if tokenSecret == "" {
+		log.Fatal("JWT_TOKEN_SECRET env var not found")
+	}
+
+	refreshTokenSecret := os.Getenv("JWT_REFRESH_TOKEN_SECRET")
+	if refreshTokenSecret == "" {
+		log.Fatal("JWT_REFRESH_TOKEN_SECRET env var not found")
 	}
 
 	// Setup repositories
@@ -31,7 +36,7 @@ func (app *Application) Setup() {
 	refreshTokenRepository := repositories.NewPSQLRefreshTokenRepository(app.DB)
 
 	// Setup services
-	jwtService := services.NewJWTService(hmacSecret, refreshTokenRepository)
+	jwtService := services.NewJWTService(tokenSecret, refreshTokenSecret, refreshTokenRepository)
 	passwordService := services.NewPasswordService()
 	userService := services.NewUserService(userRepository, passwordService)
 

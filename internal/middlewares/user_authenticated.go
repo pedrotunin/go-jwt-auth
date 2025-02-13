@@ -25,19 +25,19 @@ func (aum *AuthenticatedUserMiddleware) IsAuthenticated() gin.HandlerFunc {
 		authorization, ok := c.Request.Header["Authorization"]
 		if !ok {
 			log.Print("IsAuthenticated: Authorization header not found")
-			c.JSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrAuthorizationHeaderNotFound))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrAuthorizationHeaderNotFound))
 			return
 		}
 
 		if len(authorization) > 1 {
 			log.Print("IsAuthenticated: multiple Authorization headers not accepted")
-			c.JSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrMultipleAuthorizationHeaders))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrMultipleAuthorizationHeaders))
 			return
 		}
 
 		if !strings.HasPrefix(authorization[0], "Bearer ") {
 			log.Print("IsAuthenticated: Authorization header malformed")
-			c.JSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrAuthorizationHeaderMalformed))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrAuthorizationHeaderMalformed))
 			return
 		}
 
@@ -46,7 +46,7 @@ func (aum *AuthenticatedUserMiddleware) IsAuthenticated() gin.HandlerFunc {
 		claims, err := aum.jwtService.ValidateToken(tokenString)
 		if err != nil {
 			log.Printf("IsAuthenticated: error validating token: %s", err.Error())
-			c.JSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrTokenInvalid))
+			c.AbortWithStatusJSON(http.StatusUnauthorized, utils.GetErrorResponse(utils.ErrTokenInvalid))
 			return
 		}
 

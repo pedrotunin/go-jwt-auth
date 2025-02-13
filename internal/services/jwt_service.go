@@ -12,13 +12,15 @@ import (
 )
 
 type JWTService struct {
-	hmacSecret             string
+	tokenSecret            string
+	refreshTokenSecret     string
 	refreshTokenRepository repositories.RefreshTokenRepository
 }
 
-func NewJWTService(hmacSecret string, repo repositories.RefreshTokenRepository) *JWTService {
+func NewJWTService(tokenSecret, refreshTokenSecret string, repo repositories.RefreshTokenRepository) *JWTService {
 	return &JWTService{
-		hmacSecret:             hmacSecret,
+		tokenSecret:            tokenSecret,
+		refreshTokenSecret:     refreshTokenSecret,
 		refreshTokenRepository: repo,
 	}
 }
@@ -42,7 +44,7 @@ func (js *JWTService) GenerateToken(userID models.UserID) (tokenString string, e
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err = token.SignedString([]byte(js.hmacSecret))
+	tokenString, err = token.SignedString([]byte(js.tokenSecret))
 	if err != nil {
 		log.Printf("GenerateToken: error creating token: %s", err.Error())
 		return "", err
@@ -71,7 +73,7 @@ func (js *JWTService) GenerateRefreshToken(userID models.UserID) (tokenString st
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	tokenString, err = token.SignedString([]byte(js.hmacSecret))
+	tokenString, err = token.SignedString([]byte(js.refreshTokenSecret))
 	if err != nil {
 		log.Printf("GenerateRefreshToken: error creating refresh token: %s", err.Error())
 		return "", err
@@ -93,14 +95,14 @@ func (js *JWTService) GenerateRefreshToken(userID models.UserID) (tokenString st
 }
 
 func (js *JWTService) ValidateToken(tokenString string) (*TokenClaims, error) {
-	claims := &TokenClaims{}
+	claims := TokenClaims{}
 
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
 		}
 
-		return []byte(js.hmacSecret), nil
+		return []byte(js.tokenSecret), nil
 	})
 	if err != nil {
 		log.Printf("ValidateToken: error parsing token: %s", err.Error())
@@ -112,23 +114,19 @@ func (js *JWTService) ValidateToken(tokenString string) (*TokenClaims, error) {
 		return nil, utils.ErrTokenInvalid
 	}
 
-	if claims, ok := token.Claims.(TokenClaims); ok {
-		return &claims, nil
-	} else {
-		log.Printf("ValidateToken: error parsing token claims")
-		return nil, fmt.Errorf("error parsing token")
-	}
+	log.Print("ValidateToken: token is valid")
+	return &claims, nil
 }
 
 func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenClaims, error) {
-	claims := &RefreshTokenClaims{}
+	claims := RefreshTokenClaims{}
 
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method %v", token.Header["alg"])
 		}
 
-		return []byte(js.hmacSecret), nil
+		return []byte(js.refreshTokenSecret), nil
 	})
 	if err != nil {
 		log.Printf("ValidateRefreshToken: error parsing token: %s", err.Error())
@@ -152,7 +150,7 @@ func (js *JWTService) ValidateRefreshToken(tokenString string) (*RefreshTokenCla
 	}
 
 	log.Print("ValidateRefreshToken: refresh token is valid")
-	return claims, nil
+	return &claims, nil
 }
 
 func (js *JWTService) InvalidateRefreshToken(tokenString string) error {
