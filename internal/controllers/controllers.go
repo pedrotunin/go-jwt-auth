@@ -1,6 +1,6 @@
 package controllers
 
 type Controllers struct {
-	AuthController *AuthController
-	UserController *UserController
+	AuthController IAuthController
+	UserController IUserController
 }

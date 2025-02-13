@@ -13,6 +13,12 @@ import (
 	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
+type IAuthController interface {
+	Login(c *gin.Context)
+	Logout(c *gin.Context)
+	Refresh(c *gin.Context)
+}
+
 type AuthController struct {
 	UserService services.IUserService
 	HashService services.IHashService

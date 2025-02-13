@@ -12,11 +12,15 @@ import (
 	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
+type IUserController interface {
+	CreateUser(c *gin.Context)
+}
+
 type UserController struct {
 	userService services.IUserService
 }
 
-func NewUserController(userService services.IUserService) *UserController {
+func NewUserController(userService services.IUserService) IUserController {
 	return &UserController{
 		userService: userService,
 	}
