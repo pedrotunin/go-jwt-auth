@@ -131,3 +131,37 @@ func (repo *PSQLRefreshTokenRepository) InvalidateRefreshTokenByContent(content 
 	log.Printf("InvalidateRefreshTokenByContent: invalidated refresh token")
 	return nil
 }
+
+func (repo *PSQLRefreshTokenRepository) InvalidateRefreshTokensByUserID(userID models.UserID) error {
+	tx, err := repo.db.Begin()
+	if err != nil {
+		log.Printf("InvalidateRefreshTokensByUserID: error creating transaction: %s", err.Error())
+		return fmt.Errorf("InvalidateRefreshTokensByUserID: error creating transaction: %w", err)
+	}
+
+	stmt, err := tx.Prepare("UPDATE refresh_tokens SET status='inactive' WHERE user_id=$1;")
+	if err != nil {
+		log.Printf("InvalidateRefreshTokensByUserID: error creating statement: %s", err.Error())
+		tx.Rollback()
+		return fmt.Errorf("InvalidateRefreshTokensByUserID: error creating prepared statement: %w", err)
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userID)
+	if err != nil {
+		log.Printf("InvalidateRefreshTokensByUserID: error executing query: %s", err.Error())
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("InvalidateRefreshTokensByUserID: error during commit: %s", err.Error())
+		tx.Rollback()
+		return err
+	}
+
+	log.Printf("InvalidateRefreshTokensByUserID: invalidated refresh tokens")
+	return nil
+
+}

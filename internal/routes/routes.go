@@ -23,6 +23,7 @@ func (r *Routes) Setup() {
 	authRoutes := r.Router.Group("/auth")
 	{
 		authRoutes.POST("/login", r.Controllers.AuthController.Login)
+		authRoutes.POST("/logout", r.Middlewares.AuthenticatedUserMiddleware.IsAuthenticated(), r.Controllers.AuthController.Logout)
 		authRoutes.POST("/refresh", r.Controllers.AuthController.Refresh)
 	}
 }

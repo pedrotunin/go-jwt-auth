@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/pedrotunin/go-jwt-auth/internal/models"
@@ -84,6 +85,28 @@ func (ac *AuthController) Login(c *gin.Context) {
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 	})
+}
+
+func (ac *AuthController) Logout(c *gin.Context) {
+	authorization := c.Request.Header["Authorization"]
+	token := strings.Split(authorization[0], " ")[1]
+
+	claims, err := ac.JWTService.ValidateToken(token)
+	if err != nil {
+		return
+	}
+
+	userID := claims.UserID
+
+	err = ac.JWTService.InvalidateRefreshTokensByUserID(userID)
+	if err != nil {
+		log.Printf("Logout: error invalidating refresh tokens: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
+		return
+	}
+
+	log.Print("Logout: logout successful")
+	c.String(http.StatusOK, "")
 }
 
 type refreshDTO struct {
