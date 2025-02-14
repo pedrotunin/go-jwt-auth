@@ -55,6 +55,7 @@ func (aum *AuthenticatedUserMiddleware) IsAuthenticated() gin.HandlerFunc {
 		}
 
 		log.Printf("user %d is authenticated", claims.UserID)
+		c.Set("userID", claims.UserID)
 		c.Next()
 	}
 }

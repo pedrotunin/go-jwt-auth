@@ -30,6 +30,11 @@ func (r *Routes) Setup() {
 			auth.POST("/refresh", r.Controllers.AuthController.Refresh)
 		}
 
+		apps := v1.Group("/apps")
+		{
+			apps.POST("/", r.Middlewares.AuthenticatedUserMiddleware.IsAuthenticated(), r.Controllers.AppController.Create)
+		}
+
 	}
 
 }

@@ -35,3 +35,7 @@ var ErrInvalidEmail = errors.New("email is invalid")
 // Verify Token Errors
 var ErrVerifyTokenNotFound = errors.New("verify token not found")
 var ErrVerifyTokenExpired = errors.New("verify token expired")
+
+// App Errors
+var ErrAppNameInvalid = errors.New("app name is invalid")
+var ErrAppDescInvalid = errors.New("app description invalid")

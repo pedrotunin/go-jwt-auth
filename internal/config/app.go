@@ -35,6 +35,7 @@ func (app *Application) Setup() {
 	userRepository := repositories.NewPSQLUserRepository(app.DB)
 	refreshTokenRepository := repositories.NewPSQLRefreshTokenRepository(app.DB)
 	evtRepository := repositories.NewPSQLEmailVerificationTokenRepository(app.DB)
+	appRepository := repositories.NewPSQLAppRepository(app.DB)
 
 	// Setup services
 	sendGridMailerService := services.NewSendGridMailerService(
@@ -46,6 +47,7 @@ func (app *Application) Setup() {
 	jwtService := services.NewJWTService(tokenSecret, refreshTokenSecret, refreshTokenRepository, hashService)
 	userService := services.NewUserService(userRepository, hashService)
 	evtService := services.NewEmailVerificationTokenService(evtRepository)
+	appService := services.NewAppService(appRepository)
 
 	// Setup controllers
 	authController := &controllers.AuthController{
@@ -54,6 +56,9 @@ func (app *Application) Setup() {
 		JWTService:  jwtService,
 	}
 	userController := controllers.NewUserController(userService, evtService, sendGridMailerService)
+	appController := &controllers.AppController{
+		AppService: appService,
+	}
 
 	// Setup middlewares
 	authenticatedUserMiddleware := middlewares.NewAuthenticatedUserMiddleware(jwtService)
@@ -69,6 +74,7 @@ func (app *Application) Setup() {
 		Controllers: &controllers.Controllers{
 			AuthController: authController,
 			UserController: userController,
+			AppController:  appController,
 		},
 	}
 	routes.Setup()
