@@ -19,7 +19,7 @@ func (r *Routes) Setup() {
 	{
 		users := v1.Group("/users")
 		{
-			users.POST("", r.Controllers.UserController.CreateUser)
+			users.POST("/", r.Controllers.UserController.CreateUser)
 			users.GET("/:id/verify", r.Controllers.UserController.VerifyUser)
 		}
 
@@ -30,9 +30,10 @@ func (r *Routes) Setup() {
 			auth.POST("/refresh", r.Controllers.AuthController.Refresh)
 		}
 
-		apps := v1.Group("/apps")
+		apps := v1.Group("/apps", r.Middlewares.AuthenticatedUserMiddleware.IsAuthenticated())
 		{
-			apps.POST("/", r.Middlewares.AuthenticatedUserMiddleware.IsAuthenticated(), r.Controllers.AppController.Create)
+			apps.POST("/", r.Controllers.AppController.Create)
+			apps.DELETE("/:id", r.Controllers.AppController.DeleteByID)
 		}
 
 	}

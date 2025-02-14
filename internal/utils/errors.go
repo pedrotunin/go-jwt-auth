@@ -37,5 +37,7 @@ var ErrVerifyTokenNotFound = errors.New("verify token not found")
 var ErrVerifyTokenExpired = errors.New("verify token expired")
 
 // App Errors
+var ErrAppIDInvalid = errors.New("app id is invalid")
 var ErrAppNameInvalid = errors.New("app name is invalid")
 var ErrAppDescInvalid = errors.New("app description invalid")
+var ErrAppNotFound = errors.New("app not found")
