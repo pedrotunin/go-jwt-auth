@@ -72,7 +72,6 @@ func (repo *PSQLRefreshTokenRepository) GetRefreshTokenByContent(content models.
 	var resContent, resStatus string
 	err = stmt.QueryRow(content).Scan(&resId, &resContent, &resUserId, &resStatus)
 	if err != nil {
-		log.Printf("content: %s", content)
 		log.Printf("GetRefreshTokenByContent: error executing query: %s", err.Error())
 		tx.Rollback()
 

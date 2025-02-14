@@ -62,6 +62,17 @@ func (ac *AuthController) Login(c *gin.Context) {
 		return
 	}
 
+	if err := ac.UserService.VerifyActiveUser(user); err != nil {
+
+		if errors.Is(err, utils.ErrUserPending) {
+			c.JSON(http.StatusBadRequest, utils.GetErrorResponse(fmt.Errorf("user is pending activation, check your e-mail to activate.")))
+			return
+		}
+
+		c.JSON(http.StatusBadRequest, utils.GetErrorResponse(err))
+		return
+	}
+
 	err = ac.HashService.CompareArgon2id(loginDTO.Password, user.Password)
 	if err != nil {
 		log.Printf("Login: error comparing password and hash: %s", err.Error())

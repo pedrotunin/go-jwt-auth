@@ -7,4 +7,5 @@ import (
 type UserRepository interface {
 	GetUserByEmail(email models.UserEmail) (*models.User, error)
 	CreateUser(u *models.User) (id int, err error)
+	ActivateUser(userID models.UserID) error
 }

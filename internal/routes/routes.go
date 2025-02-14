@@ -15,15 +15,21 @@ type Routes struct {
 func (r *Routes) Setup() {
 	r.Router.Use(r.Middlewares.LoggerMiddleware.LogRequest())
 
-	usersRoutes := r.Router.Group("/users")
+	v1 := r.Router.Group("/v1")
 	{
-		usersRoutes.POST("", r.Controllers.UserController.CreateUser)
+		users := v1.Group("/users")
+		{
+			users.POST("", r.Controllers.UserController.CreateUser)
+			users.GET("/:id/verify", r.Controllers.UserController.VerifyUser)
+		}
+
+		auth := v1.Group("/auth")
+		{
+			auth.POST("/login", r.Controllers.AuthController.Login)
+			auth.POST("/logout", r.Middlewares.AuthenticatedUserMiddleware.IsAuthenticated(), r.Controllers.AuthController.Logout)
+			auth.POST("/refresh", r.Controllers.AuthController.Refresh)
+		}
+
 	}
 
-	authRoutes := r.Router.Group("/auth")
-	{
-		authRoutes.POST("/login", r.Controllers.AuthController.Login)
-		authRoutes.POST("/logout", r.Middlewares.AuthenticatedUserMiddleware.IsAuthenticated(), r.Controllers.AuthController.Logout)
-		authRoutes.POST("/refresh", r.Controllers.AuthController.Refresh)
-	}
 }

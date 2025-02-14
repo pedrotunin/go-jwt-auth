@@ -5,11 +5,14 @@ import (
 
 	"github.com/pedrotunin/go-jwt-auth/internal/models"
 	"github.com/pedrotunin/go-jwt-auth/internal/repositories"
+	"github.com/pedrotunin/go-jwt-auth/internal/utils"
 )
 
 type IUserService interface {
 	GetUserByEmail(email string) (*models.User, error)
 	CreateUser(u *models.User) error
+	VerifyActiveUser(u *models.User) error
+	ActivateUser(userID models.UserID) error
 }
 
 type UserService struct {
@@ -52,5 +55,29 @@ func (us *UserService) CreateUser(u *models.User) error {
 	u.ID = id
 
 	log.Printf("CreateUser: user created")
+	return nil
+}
+
+func (us *UserService) VerifyActiveUser(u *models.User) error {
+	if u.Status == utils.UserStatusActive {
+		return nil
+	}
+
+	switch u.Status {
+	case utils.UserStatusInactive:
+		return utils.ErrUserInactive
+	case utils.UserStatusPending:
+		return utils.ErrUserPending
+	default:
+		return utils.ErrInvalidUserStatus
+	}
+}
+
+func (us *UserService) ActivateUser(userID models.UserID) error {
+	err := us.userRepository.ActivateUser(userID)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

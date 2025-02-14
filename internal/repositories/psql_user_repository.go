@@ -105,3 +105,36 @@ func (repo *PSQLUserRepository) CreateUser(u *models.User) (id int, err error) {
 	log.Print("CreateUser: user created in users table")
 	return insertedID, nil
 }
+
+func (repo *PSQLUserRepository) ActivateUser(userID models.UserID) error {
+	tx, err := repo.db.Begin()
+	if err != nil {
+		log.Printf("ActivateUser: error creating transaction: %s", err.Error())
+		return err
+	}
+
+	stmt, err := tx.Prepare("UPDATE users SET status='active' WHERE id=$1;")
+	if err != nil {
+		log.Printf("ActivateUser: error creating statement: %s", err.Error())
+		tx.Rollback()
+		return err
+	}
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userID)
+	if err != nil {
+		log.Printf("ActivateUser: error executing query: %s", err.Error())
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		log.Printf("ActivateUser: error during commmit: %s", err.Error())
+		tx.Rollback()
+		return err
+	}
+
+	log.Printf("ActivateUser: user activated")
+	return nil
+}
