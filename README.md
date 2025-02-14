@@ -37,7 +37,7 @@ Before running the project, you need to have the following installed:
 
     ```bash
     git clone https://github.com/pedrotunin/go-jwt-auth.git
-    cd yourproject
+    cd go-jwt-auth
     ```
 
 2. Install Go dependencies:
@@ -48,6 +48,7 @@ Before running the project, you need to have the following installed:
 
 3. Set up your PostgreSQL database:
     - Create a PostgreSQL database and user.
+    - Execute the sql/setup.sql script inside your database.
     - Configure the connection in your application by editing the `.env` file with the necessary database credentials.
 
     Example `.env` file:
@@ -62,6 +63,9 @@ Before running the project, you need to have the following installed:
     JWT_REFRESH_TOKEN_SECRET=
     PORT=8080
     MODE=DEBUG # DEBUG or PRODUCTION
+    SENDGRID_SENDER_NAME=
+    SENDGRID_SENDER_EMAIL=
+    SENDGRID_API_KEY=
     ```
 
 4. **(Optional)** Install Air for live-reloading during development:

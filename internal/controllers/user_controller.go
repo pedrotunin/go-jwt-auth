@@ -1,8 +1,10 @@
 package controllers
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"strconv"
@@ -21,18 +23,56 @@ type IUserController interface {
 type UserController struct {
 	userService                   services.IUserService
 	emailVerificationTokenService services.IEmailVerificationTokenService
+	mailerService                 services.MailerService
 }
 
-func NewUserController(userService services.IUserService, evtService services.IEmailVerificationTokenService) IUserController {
+func NewUserController(
+	userService services.IUserService,
+	evtService services.IEmailVerificationTokenService,
+	mailerService services.MailerService,
+) IUserController {
 	return &UserController{
 		userService:                   userService,
 		emailVerificationTokenService: evtService,
+		mailerService:                 mailerService,
 	}
 }
 
 type createUserDTO struct {
 	Email    string
 	Password string
+}
+
+func (ac *UserController) sendActivationEmail(user *models.User, token string) error {
+	var htmlBody bytes.Buffer
+
+	tmpl, err := template.ParseFiles("templates/activation_user_email.html")
+	if err != nil {
+		log.Printf("sendActivationEmail: error parsing template: %s", err.Error())
+		return err
+	}
+
+	url := fmt.Sprintf("http://localhost:8080/v1/users/%d/verify?token=%s", user.ID, token)
+
+	err = tmpl.Execute(&htmlBody, struct {
+		UserEmail      string
+		ActivationLink string
+	}{
+		UserEmail:      user.Email,
+		ActivationLink: url,
+	})
+	if err != nil {
+		log.Printf("sendActivationEmail: error executing template: %s", err.Error())
+		return err
+	}
+
+	err = ac.mailerService.SendEmail("", user.Email, "Activate your account", "", htmlBody.String())
+	if err != nil {
+		log.Printf("sendActivationEmail: error sending email: %s", err.Error())
+		return err
+	}
+
+	return nil
 }
 
 func (ac *UserController) CreateUser(c *gin.Context) {
@@ -76,8 +116,12 @@ func (ac *UserController) CreateUser(c *gin.Context) {
 		return
 	}
 
-	// TODO: send confirmation email
-	log.Printf("sending email with token %s", evToken)
+	err = ac.sendActivationEmail(user, evToken)
+	if err != nil {
+		log.Printf("CreateUser: sending activation email: %s", err.Error())
+		c.JSON(http.StatusInternalServerError, utils.GetErrorResponse(utils.ErrInternalServerError))
+		return
+	}
 
 	c.JSON(http.StatusCreated, map[string]string{
 		"message": "user created, check e-mail for activation instructions.",

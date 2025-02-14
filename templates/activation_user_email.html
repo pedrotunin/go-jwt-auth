@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Activation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .email-container {
+            width: 100%;
+            background-color: #ffffff;
+            margin: 0 auto;
+            padding: 20px;
+            max-width: 600px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .email-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .email-header h1 {
+            font-size: 24px;
+            color: #333333;
+        }
+
+        .email-body {
+            margin-bottom: 20px;
+            font-size: 16px;
+            line-height: 1.5;
+            color: #555555;
+        }
+
+        .email-body p {
+            margin-bottom: 15px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: #ffffff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .email-footer {
+            font-size: 12px;
+            color: #888888;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .email-footer p {
+            margin: 5px;
+        }
+
+        @media screen and (max-width: 600px) {
+            .email-container {
+                padding: 15px;
+            }
+
+            .button {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="email-container">
+        <div class="email-header">
+            <h1>Activate Your Account!</h1>
+        </div>
+
+        <div class="email-body">
+            <p>Hello, {{ .UserEmail }},</p>
+            <p>Thank you for signing up on our platform. To activate your account, please click the link below:</p>
+
+            <p style="text-align: center;">
+                <a href="{{ .ActivationLink }}" class="button">Activate Account</a>
+            </p>
+
+            <p>If you did not sign up for our platform, please ignore this email.</p>
+            <p>If you have any questions, feel free to contact us.</p>
+        </div>
+
+        <div class="email-footer">
+            <p><em>This is an automated email. Please do not reply to this email directly.</em></p>
+        </div>
+    </div>
+
+</body>
+</html>

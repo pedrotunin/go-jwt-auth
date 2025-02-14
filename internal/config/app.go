@@ -37,6 +37,11 @@ func (app *Application) Setup() {
 	evtRepository := repositories.NewPSQLEmailVerificationTokenRepository(app.DB)
 
 	// Setup services
+	sendGridMailerService := services.NewSendGridMailerService(
+		os.Getenv("SENDGRID_SENDER_NAME"),
+		os.Getenv("SENDGRID_SENDER_EMAIL"),
+		os.Getenv("SENDGRID_API_KEY"),
+	)
 	hashService := services.NewHashService()
 	jwtService := services.NewJWTService(tokenSecret, refreshTokenSecret, refreshTokenRepository, hashService)
 	userService := services.NewUserService(userRepository, hashService)
@@ -48,7 +53,7 @@ func (app *Application) Setup() {
 		HashService: hashService,
 		JWTService:  jwtService,
 	}
-	userController := controllers.NewUserController(userService, evtService)
+	userController := controllers.NewUserController(userService, evtService, sendGridMailerService)
 
 	// Setup middlewares
 	authenticatedUserMiddleware := middlewares.NewAuthenticatedUserMiddleware(jwtService)
