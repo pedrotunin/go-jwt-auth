@@ -78,7 +78,7 @@ func (ac *UserController) sendActivationEmail(user *models.User, token string) e
 func (ac *UserController) CreateUser(c *gin.Context) {
 	var createUserDTO createUserDTO
 
-	err := c.ShouldBind(&createUserDTO)
+	err := c.ShouldBindJSON(&createUserDTO)
 	if err != nil {
 		log.Printf("CreateUser: error during binding user: %s", err.Error())
 

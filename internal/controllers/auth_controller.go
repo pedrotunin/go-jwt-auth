@@ -33,7 +33,7 @@ type loginDTO struct {
 func (ac *AuthController) Login(c *gin.Context) {
 	var loginDTO loginDTO
 
-	err := c.ShouldBind(&loginDTO)
+	err := c.ShouldBindJSON(&loginDTO)
 	if err != nil {
 		log.Printf("Login: error during binding loginDTO: %s", err.Error())
 
@@ -134,7 +134,7 @@ type refreshDTO struct {
 func (ac *AuthController) Refresh(c *gin.Context) {
 	var refreshDTO refreshDTO
 
-	err := c.ShouldBind(&refreshDTO)
+	err := c.ShouldBindJSON(&refreshDTO)
 	if err != nil {
 		log.Printf("Refresh: error during binding refreshDTO: %s", err.Error())
 		c.JSON(http.StatusBadRequest, utils.GetErrorResponse(
