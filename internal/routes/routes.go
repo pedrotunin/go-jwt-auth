@@ -32,7 +32,10 @@ func (r *Routes) Setup() {
 
 		apps := v1.Group("/apps", r.Middlewares.AuthenticatedUserMiddleware.IsAuthenticated())
 		{
+			apps.GET("/", r.Controllers.AppController.GetAll)
+			apps.GET("/:id", r.Controllers.AppController.GetOne)
 			apps.POST("/", r.Controllers.AppController.Create)
+			apps.PUT("/:id", r.Controllers.AppController.Update)
 			apps.DELETE("/:id", r.Controllers.AppController.DeleteByID)
 		}
 

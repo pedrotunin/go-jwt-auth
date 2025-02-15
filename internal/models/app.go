@@ -11,13 +11,13 @@ type AppName = string
 type AppDescription = string
 
 type App struct {
-	ID          AppID
-	Name        AppName
-	Description AppDescription
-	UserID      UserID
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   time.Time
+	ID          AppID          `json:"id"`
+	Name        AppName        `json:"name"`
+	Description AppDescription `json:"description"`
+	UserID      UserID         `json:"user_id"`
+	CreatedAt   time.Time      `json:"created_at"`
+	UpdatedAt   time.Time      `json:"updated_at"`
+	DeletedAt   time.Time      `json:"deleted_at,omitempty"`
 }
 
 func NewApp(name, description string, userID UserID) (*App, error) {
